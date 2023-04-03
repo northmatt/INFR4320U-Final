@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerController : Bird {
-    void Start() {
+    override public void Start() {
         base.Start();
     }
 

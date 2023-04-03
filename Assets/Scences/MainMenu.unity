@@ -154,8 +154,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal P1
-  m_VerticalAxis: Vertical P1
+  m_HorizontalAxis: Horizontal
+  m_VerticalAxis: Vertical
   m_SubmitButton: Submit
   m_CancelButton: Cancel
   m_InputActionsPerSecond: 10
@@ -684,16 +684,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 0}
-  cpuPrefab: {fileID: 0}
+  cpuPrefab: {fileID: 956999652346342452, guid: 5e75cd638c9d9d44c926797cacf17bdb,
+    type: 3}
   backgroundPrefab: {fileID: 8822351868527311275, guid: 1f70b7d14d8b6314592325e2fc7da948,
     type: 3}
   pipePrefab: {fileID: 2446800582817220861, guid: 5c4e7d04d81a45c4392e679000a86a2c,
     type: 3}
-  pipeSpacing: 1
-  moveSpeedStart: 2
-  moveSpeedMax: 4
-  moveSpeedIncrease: 0.5
+  pipeSpacing: 4
+  pipeRandom: {x: -2, y: 6}
+  moveSpeedStart: 3
+  moveSpeedMax: 6
+  moveSpeedIncrease: 0.05
   isGameOver: 0
+  customPipeColor: {r: 0.38679248, g: 0.0748042, b: 0.12277937, a: 1}
 --- !u!1 &1043923830
 GameObject:
   m_ObjectHideFlags: 0
