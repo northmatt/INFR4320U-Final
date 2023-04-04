@@ -24,22 +24,23 @@ public class Bird : Agent {
             Death();
     }
 
+	//Next pipe is always next in child index
     public void SetClosestPipe(Transform pipe, bool forceSetPrevPipe) {
         if (forceSetPrevPipe)
             closestPipePrev = pipe;
 
-        if (closestPipe != null && pipe != null) {
+        if (GameController.instance.useCustomPipeColor && closestPipe != null && pipe != null) {
             foreach (SpriteRenderer sprite in closestPipe.gameObject.GetComponentsInChildren<SpriteRenderer>())
                 sprite.color = pipe.gameObject.GetComponentInChildren<SpriteRenderer>().color;
         }
-        else if (closestPipe != null && closestPipePrev != null) {
+        else if (GameController.instance.useCustomPipeColor && closestPipe != null && closestPipePrev != null) {
             foreach (SpriteRenderer sprite in closestPipe.gameObject.GetComponentsInChildren<SpriteRenderer>())
                 sprite.color = closestPipePrev.gameObject.GetComponentInChildren<SpriteRenderer>().color;
         }
 
         closestPipe = pipe;
 
-        if (closestPipe != null) {
+        if (GameController.instance.useCustomPipeColor && closestPipe != null) {
             foreach (SpriteRenderer sprite in closestPipe.gameObject.GetComponentsInChildren<SpriteRenderer>())
                 sprite.color = GameController.instance.customPipeColor;
         }

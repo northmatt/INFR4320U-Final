@@ -18,6 +18,7 @@ public class GameController : MonoBehaviour {
     public float moveSpeedMax = 4f;
     public float moveSpeedIncrease = 0.5f;
     public bool isGameOver = false;
+    public bool useCustomPipeColor = false;
     public Color customPipeColor;
 
     private AudioSource aS;
@@ -105,7 +106,7 @@ public class GameController : MonoBehaviour {
                 totalPipeSpacing += pipeSpacing;
 
                 Transform newWorld;
-                for (int i = 1; i < 15; i++) {
+                for (int i = 0; i < 1; i++) {
                     newWorld = Instantiate(worldTransform.gameObject, i * 1.5f * backgroundSpriteLength * Vector3.up, Quaternion.identity).transform;
                     SetupWorld(newWorld);
                 }
@@ -137,17 +138,17 @@ public class GameController : MonoBehaviour {
 
     public void UpdateWorld(Bird bird) {
         bird.currentMoveSpeed = Mathf.Min(bird.currentMoveSpeed + moveSpeedIncrease * Time.deltaTime, moveSpeedMax);
+        bool forceSetPrevPipe = bird.GetClosestPipe() == null;
+        float pipeLengthHalfBirdCollider = (totalPipeSpacing - pipeSpacing) * -0.5f - bird.col.radius;
 
         foreach (Transform child in bird.transform.parent.parent.Find("Background")) {
             child.Translate(-bird.currentMoveSpeed * Time.deltaTime, 0f, 0f);
 
-            if (Camera.main.orthographicSize * Camera.main.aspect + (backgroundSpriteLength * 0.5f) + child.localPosition.x < 0f) {
+            if (Camera.main.orthographicSize * Camera.main.aspect + (backgroundSpriteLength * 0.5f) + child.localPosition.x < 0f && !forceSetPrevPipe) {
                 child.Translate(backgroundSpriteLength * child.parent.childCount, 0f, 0f);
             }
         }
 
-        bool forceSetPrevPipe = bird.GetClosestPipe() == null;
-        float pipeLengthHalfBirdCollider = (totalPipeSpacing - pipeSpacing) * -0.5f - bird.col.radius;
         foreach (Transform child in bird.transform.parent.parent.Find("Pipes")) {
             child.Translate(-bird.currentMoveSpeed * Time.deltaTime, 0f, 0f);
 
