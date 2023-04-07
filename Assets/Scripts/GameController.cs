@@ -14,19 +14,20 @@ public class GameController : MonoBehaviour {
     public GameObject pipePrefab;
     public float pipeSpacing = 1f;
     public Vector2 pipeRandom;
-    public float moveSpeedStart = 2f;
+    public float moveSpeedMin = 2f;
     public float moveSpeedMax = 4f;
     public float moveSpeedIncrease = 0.5f;
     public bool isGameOver = false;
+    public bool playerWon = false;
     public bool useCustomPipeColor = false;
     public Color customPipeColor;
 
-    private AudioSource aS;
     private Transform worldTransform;
     private Transform gameOverUI;
     private float backgroundSpriteLength = 0f;
     private float totalPipeSpacing = 0f;
     private int currentSceneIndex = 0;
+    private float currentMoveSpeed = 0f;
 
     private void OnEnable() {
         if (instance != this)
@@ -52,8 +53,6 @@ public class GameController : MonoBehaviour {
         instance = this;
         DontDestroyOnLoad(gameObject);
 
-        aS = GetComponent<AudioSource>();
-
         //I dont know if I should like this solution or not...
         OnEnable();
 
@@ -61,21 +60,43 @@ public class GameController : MonoBehaviour {
     }
 
     private void Update() {
-        if (currentSceneIndex == 0)
-            return;
+        if (worldTransform && SceneManager.GetActiveScene().buildIndex == 1)
+            UpdateWorld(worldTransform);
+
+        if (Input.GetButtonDown("Submit"))
+            isGameOver = false;
     }
 
-    public void GameOver(Bird bird) {
-        foreach (Transform child1 in bird.transform.parent.parent) {
+    public void GameOver(Transform world) {
+        isGameOver = true;
+        Time.timeScale = 0f;
+        gameOverUI.gameObject.SetActive(true);
+
+        gameOverUI.GetChild(0).GetComponent<Text>().text = (playerWon ? "Player wins" : "AI wins");
+
+        StartCoroutine(RestartWorld(world));
+    }
+
+    private IEnumerator RestartWorld(Transform world) {
+        while (isGameOver) {
+            yield return null;
+        }
+        
+        foreach (Transform child1 in world) {
             foreach (Transform child2 in child1) {
-                if (child2 == bird.transform)
+                if (child2.gameObject.layer == LayerMask.NameToLayer("Bird"))
                     continue;
 
                 Destroy(child2.gameObject);
             }
         }
 
-        SetupWorld(bird.transform.parent.parent, false);
+        Time.timeScale = 1f;
+        gameOverUI.gameObject.SetActive(false);
+
+        SetupWorld(world, false);
+        world.Find("Entities").GetComponentInChildren<cpuController>().ResetAgent();
+        world.Find("Entities").GetComponentInChildren<PlayerController>().ResetPlayer();
     }
 
     private void SetupScene(int sceneIndex) {
@@ -87,7 +108,6 @@ public class GameController : MonoBehaviour {
                 GameObject.Find("Quit Button").GetComponent<Button>().onClick.AddListener(delegate { QuitGame(); });
                 break;
             case 1:
-                worldTransform = GameObject.Find("World").transform;
                 gameOverUI = GameObject.Find("UI Layer").transform.GetChild(0);
 
                 backgroundSpriteLength = 0f;
@@ -105,10 +125,9 @@ public class GameController : MonoBehaviour {
                 }
                 totalPipeSpacing += pipeSpacing;
 
-                Transform newWorld;
                 for (int i = 0; i < 1; i++) {
-                    newWorld = Instantiate(worldTransform.gameObject, i * 1.5f * backgroundSpriteLength * Vector3.up, Quaternion.identity).transform;
-                    SetupWorld(newWorld);
+                    worldTransform = Instantiate(GameObject.Find("World").transform, i * 1.5f * backgroundSpriteLength * Vector3.up, Quaternion.identity).transform;
+                    SetupWorld(worldTransform);
                 }
 
                 break;
@@ -122,6 +141,8 @@ public class GameController : MonoBehaviour {
     }
 
     public void SetupWorld(Transform world, bool spawnBird = true) {
+        currentMoveSpeed = moveSpeedMin;
+
         //+1 for scrolling buffer, *0.01f for "safety" overhead
         for (int index = (int)Mathf.Ceil(2.01f * Camera.main.orthographicSize * Camera.main.aspect / backgroundSpriteLength) + 1; index > 0; --index) {
             Instantiate(backgroundPrefab, ((index - 2) * backgroundSpriteLength) * Vector3.right + world.position, Quaternion.identity, world.Find("Background"));
@@ -132,31 +153,34 @@ public class GameController : MonoBehaviour {
             Instantiate(pipePrefab, new Vector3((index + 1) * totalPipeSpacing, Random.Range(pipeRandom.x, pipeRandom.y), 0f) + world.position, Quaternion.identity, world.Find("Pipes"));
         }
 
-        if (spawnBird)
+        if (spawnBird) {
             Instantiate(cpuPrefab, world.position, Quaternion.identity, world.Find("Entities"));
+            Instantiate(playerPrefab, world.position, Quaternion.identity, world.Find("Entities"));
+        }
     }
 
-    public void UpdateWorld(Bird bird) {
-        bird.currentMoveSpeed = Mathf.Min(bird.currentMoveSpeed + moveSpeedIncrease * Time.deltaTime, moveSpeedMax);
+    public void UpdateWorld(Transform world) {
+        currentMoveSpeed = Mathf.Min(currentMoveSpeed + moveSpeedIncrease * Time.deltaTime, moveSpeedMax);
+        cpuController bird = world.GetComponentInChildren<cpuController>();
         bool forceSetPrevPipe = bird.GetClosestPipe() == null;
-        float pipeLengthHalfBirdCollider = (totalPipeSpacing - pipeSpacing) * -0.5f - bird.col.radius;
+        float pipeLengthHalfBirdCollider = (totalPipeSpacing - pipeSpacing) * 0.5f + bird.col.radius;
 
-        foreach (Transform child in bird.transform.parent.parent.Find("Background")) {
-            child.Translate(-bird.currentMoveSpeed * Time.deltaTime, 0f, 0f);
+        foreach (Transform child in world.Find("Background")) {
+            child.Translate(-currentMoveSpeed * Time.deltaTime, 0f, 0f);
 
             if (Camera.main.orthographicSize * Camera.main.aspect + (backgroundSpriteLength * 0.5f) + child.localPosition.x < 0f && !forceSetPrevPipe) {
                 child.Translate(backgroundSpriteLength * child.parent.childCount, 0f, 0f);
             }
         }
 
-        foreach (Transform child in bird.transform.parent.parent.Find("Pipes")) {
-            child.Translate(-bird.currentMoveSpeed * Time.deltaTime, 0f, 0f);
+        foreach (Transform child in world.Find("Pipes")) {
+            child.Translate(-currentMoveSpeed * Time.deltaTime, 0f, 0f);
 
             if (Camera.main.orthographicSize * Camera.main.aspect + (totalPipeSpacing * 0.5f) + child.localPosition.x < 0f) {
                 child.localPosition = new Vector3(child.localPosition.x + totalPipeSpacing * child.parent.childCount, Random.Range(pipeRandom.x, pipeRandom.y), child.localPosition.z);
             }
 
-            if (forceSetPrevPipe || Mathf.Abs(child.position.x - bird.transform.position.x + pipeLengthHalfBirdCollider) < Mathf.Abs(bird.GetClosestPipe().position.x - bird.transform.position.x + pipeLengthHalfBirdCollider))
+            if (forceSetPrevPipe || Mathf.Abs(child.localPosition.x - pipeLengthHalfBirdCollider) < Mathf.Abs(bird.GetClosestPipe().localPosition.x - pipeLengthHalfBirdCollider))
                 bird.SetClosestPipe(child, forceSetPrevPipe);
         }
     }

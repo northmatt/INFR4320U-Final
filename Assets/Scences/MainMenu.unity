@@ -683,19 +683,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9db686141cd918c46937440b5b47c345, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 0}
+  playerPrefab: {fileID: 1411442666752107499, guid: 6fab15369f085dd46b34b5f3317fa20f,
+    type: 3}
   cpuPrefab: {fileID: 956999652346342452, guid: 5e75cd638c9d9d44c926797cacf17bdb,
     type: 3}
   backgroundPrefab: {fileID: 8822351868527311275, guid: 1f70b7d14d8b6314592325e2fc7da948,
     type: 3}
   pipePrefab: {fileID: 2446800582817220861, guid: 5c4e7d04d81a45c4392e679000a86a2c,
     type: 3}
-  pipeSpacing: 4
-  pipeRandom: {x: -2, y: 6}
-  moveSpeedStart: 3
-  moveSpeedMax: 6
-  moveSpeedIncrease: 0.05
+  pipeSpacing: 6
+  pipeRandom: {x: -1.85, y: 5.85}
+  moveSpeedMin: 2
+  moveSpeedMax: 5
+  moveSpeedIncrease: 0.04
   isGameOver: 0
+  useCustomPipeColor: 0
   customPipeColor: {r: 0.38679248, g: 0.0748042, b: 0.12277937, a: 1}
 --- !u!1 &1043923830
 GameObject:
