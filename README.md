@@ -1,6 +1,8 @@
 # INFR4320U-Final-Project
 
-To train AI install Python and ideally a virtual python environment manager like Anaconda. Python does have a built in way to use virtual environments but I haven't tested it.
+Final assignment for AI course.
+
+To train neural network install Python and ideally a virtual python environment manager like Anaconda. Python does have a built in way to use virtual environments but I haven't tested it.
 
 Steps:
 - Install Python 3.9.13 via python.org website
@@ -27,7 +29,7 @@ Steps:
   - Check if installed with `mlagents-learn --help`
 - Install Unity Package
   - Open Unity and install package in `PROJECT_DIRECTORY\ml-agents-release_20\com.unity.ml-agents\package.json`
-- Train AI:
+- Train network:
   - If cmd isnt already opened with an active virtual Python environment, open cmd in `PROJECT_DIRECTORY\ml-agents-release_20` and run `conda activate UnityML`
   - Run `mlagents-learn config/ppo/NAME_OF_CONFIG_FILE.yaml --run-id=NAME_OF_TRAINING_ID` (Add `--resume` for resuming training or `--force` for restarting from scratch. Add `--torch-device cuda` if you want to train with a Nvidia GPU)
   - Run `tensorboard --logdir results` to get webstats
